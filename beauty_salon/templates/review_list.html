@@ -1,0 +1,12 @@
+{% extends 'base_generic.html' %}
+
+{% block title %}Отзывы{% endblock %}
+
+{% block content %}
+<h1>Отзывы</h1>
+<ul>
+    {% for review in reviews %}
+    <li>{{ review.appointment.client.name }} - {{ review.rating }} звезд</li>
+    {% endfor %}
+</ul>
+{% endblock %}

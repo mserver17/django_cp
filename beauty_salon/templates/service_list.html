@@ -1,0 +1,26 @@
+{% extends 'base_generic.html' %}
+
+{% block title %}Наши услуги | Luxe Beauty{% endblock %}
+
+{% block content %}
+<section class="services">
+    <h2 class="text-center mb-5 display-4">Наши услуги</h2>
+
+    <div class="row g-4">
+        {% for service in services %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card service-card h-100">
+                <div class="price-badge">{{ service.price }} ₽</div>
+                <div class="card-body">
+                    <h3 class="card-title mb-3">{{ service.name }}</h3>
+                    <p class="card-text text-muted">{{ service.description }}</p>
+                    <div class="d-grid mt-4">
+                        <button class="btn btn-primary">Записаться</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

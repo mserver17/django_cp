@@ -1,0 +1,12 @@
+{% extends 'base_generic.html' %}
+
+{% block title %}Записи{% endblock %}
+
+{% block content %}
+<h1>Записи</h1>
+<ul>
+    {% for appointment in appointments %}
+    <li>{{ appointment.client.name }} - {{ appointment.date }} {{ appointment.time }}</li>
+    {% endfor %}
+</ul>
+{% endblock %}

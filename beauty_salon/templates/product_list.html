@@ -1,0 +1,12 @@
+{% extends 'base_generic.html' %}
+
+{% block title %}Продукты{% endblock %}
+
+{% block content %}
+<h1>Продукты</h1>
+<ul>
+    {% for product in products %}
+    <li>{{ product.name }} - {{ product.price }} руб.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

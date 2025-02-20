@@ -1,0 +1,28 @@
+{% extends 'base_generic.html' %}
+{% load static %}
+
+{% block title %}Наши мастера | Bellezza {% endblock %}
+{% block content %}
+<section class="team">
+    <h2 class="text-center mb-5 display-4">Наши мастера</h2>
+
+    <div class="row g-4">
+        {% for employee in employees %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card employee-card">
+                <img src="{% static 'images/p2.jpg' %}" class="card-img-top" alt="{{ employee.name }}">
+                <div class="card-body text-center">
+                    <h3 class="card-title mb-2">{{ employee.name }}</h3>
+                    <p class="text-muted mb-3">{{ employee.position }}</p>
+                    <div class="specialties">
+                        {% for service in employee.services.all %}
+                        <span class="badge bg-primary me-1">{{ service.name }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
