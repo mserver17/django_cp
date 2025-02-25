@@ -1,12 +1,68 @@
-{% extends 'base_generic.html' %}
+{% extends "base_generic.html" %}
+{% load static %}
 
 {% block title %}Отзывы{% endblock %}
 
 {% block content %}
-<h1>Отзывы</h1>
-<ul>
-    {% for review in reviews %}
-    <li>{{ review.appointment.client.name }} - {{ review.rating }} звезд</li>
-    {% endfor %}
-</ul>
+<div class="container my-5">
+    <h2 class="text-center mb-4 display-4">Отзывы наших клиентов</h2>
+
+    {% if reviews %}
+    <div class="row">
+        {% for review in reviews %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 review-card shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-user-circle text-secondary fs-2 me-2"></i>
+                        <h5 class="mb-0">{{ review.client.name }}</h5>
+                    </div>
+
+                    <hr class="mb-3">
+                    <div class="mb-2">
+                        <strong>Оценка:</strong>
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= review.rating %}
+                                <i class="fas fa-star text-warning"></i>
+                            {% else %}
+                                <i class="far fa-star text-warning"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <div class="flex-grow-1 mb-3">
+                        <strong>Комментарий:</strong>
+                        <p class="text-muted mb-0">{{ review.comment|default:"Без комментария" }}</p>
+                    </div>
+
+                    {% if review.appointment %}
+                    <div class="mt-auto">
+                        <small class="text-muted">
+                            Запись:
+                            {{ review.appointment.date|date:"d.m.Y" }}
+                            {{ review.appointment.time|time:"H:i" }}
+                            ({{ review.appointment.employee.name }})
+                        </small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center">
+        Пока нет отзывов.
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.review-card {
+    transition: transform 0.3s ease-in-out;
+}
+.review-card:hover {
+    transform: scale(1.02);
+}
+</style>
 {% endblock %}
+

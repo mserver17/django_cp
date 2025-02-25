@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.contrib.auth.models import User
 
 class Category(models.Model):
     name = models.CharField(max_length=255, unique=True, verbose_name='Название')
@@ -29,6 +30,12 @@ class Employee(models.Model):
     name = models.CharField(max_length=100, verbose_name='ФИО')
     position = models.CharField(max_length=100, verbose_name='Специализация')
     services = models.ManyToManyField(Service, related_name='employees', verbose_name='Услуги')
+    photo = models.ImageField(
+        upload_to='employees/',
+        null=True,
+        blank=True,
+        verbose_name='Фотография'
+    )
 
     class Meta:
         verbose_name = "Сотрудник"
@@ -38,9 +45,11 @@ class Employee(models.Model):
         return self.name
 
 class Client(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=100, verbose_name='ФИО')
     email = models.EmailField(unique=True, verbose_name='email')
     phone = models.CharField(max_length=15, unique=True, verbose_name='Номер телефона')
+    birth_date = models.DateField(null=True, blank=True, verbose_name='Дата рождения')
 
     class Meta:
         verbose_name = "Клиент"
@@ -50,19 +59,31 @@ class Client(models.Model):
         return self.name
 
 class Appointment(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Ожидает подтверждения'),
+        ('confirmed', 'Подтверждена'),
+        ('completed', 'Выполнена'),
+        ('canceled', 'Отменена'),
+    ]
     client = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name='Клиент')
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE, verbose_name='Исполнитель')
     date = models.DateField(verbose_name='Дата')
     time = models.TimeField(verbose_name='Время')
-    services = models.ManyToManyField(Service, verbose_name='Услуги')
+    service = models.ForeignKey(Service, on_delete=models.CASCADE)
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending',
+        verbose_name='Статус'
+    )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Создан')
-
     class Meta:
         verbose_name = "Запись"
         verbose_name_plural = "Записи"
+        ordering = ['-date', '-time']
 
     def __str__(self):
-        return f"{self.client.name} - {self.date}"
+        return f"{self.client.name} - {self.date} {self.time}"
 
 class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="products", null=True, blank=True)
@@ -78,7 +99,7 @@ class Product(models.Model):
         return self.name
 
 class Review(models.Model):
-    appointment = models.ForeignKey(Appointment, on_delete=models.CASCADE, null=True, blank=True)  # Разрешаем null
+    appointment = models.ForeignKey(Appointment, on_delete=models.CASCADE, null=True, blank=True)
     client = models.ForeignKey(Client, on_delete=models.CASCADE, null=True, blank=True)
     rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     comment = models.TextField(blank=True)

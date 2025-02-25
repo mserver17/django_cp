@@ -15,7 +15,7 @@ h1, h2, h3, h4, h5 {
 }
 
 .navbar {
-    background: linear-gradient(45deg, #2b1c51, #472c70);
+    background: linear-gradient(45deg, #5436cd, #8a62ef);
 }
 
 .card {
@@ -56,10 +56,11 @@ h1, h2, h3, h4, h5 {
     background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
 }
 
-.employee-card img {
+.card-img-top {
     width: 100%;
-    height: 250px;
+    height: 300px;
     object-fit: cover;
+    object-position: 50% 30%;
     border-radius: 15px 15px 0 0;
 }
 

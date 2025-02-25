@@ -6,12 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Bellezza Beauty Salon{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     <link href="{% static 'css/styles.css' %}" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
 </head>
 <body class="d-flex flex-column min-vh-100">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top shadow-lg">
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top shadow-lg">
         <div class="container">
             <a class="navbar-brand fw-bold" href="{% url 'home' %}">
                 <i class="bi bi-flower1 me-2"></i>Bellezza
@@ -36,22 +38,47 @@
                     <li class="nav-item mx-2">
                         <a class="nav-link" href="{% url 'review_list' %}">Отзывы</a>
                     </li>
+                    <li class="nav-item mx-2">
+                        <a class="nav-link" href="{% url 'appointment_create' %}">Записаться</a>
+                    </li>
+<!--                    {% if user.is_authenticated %}-->
+<!--                        <li class="nav-item mx-2">-->
+<!--                            <a class="nav-link" href="{% url 'profile' %}">Профиль</a>-->
+<!--                        </li>-->
+<!--                    {% endif %}-->
                 </ul>
+                <div class="d-flex ms-3 align-items-center">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'profile' %}" class="text-decoration-none text-light me-3">
+                            <div class="d-flex flex-column">
+                                <span class="fw-bold">{{ user.username }}</span>
+                                <small class="text-white">{{ user.email }}</small>
+                            </div>
+                        </a>
+                        <form action="{% url 'logout' %}" method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-light">Выход</button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-outline-light me-2">Вход</a>
+                        <a href="{% url 'register' %}" class="btn btn-light">Регистрация</a>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </nav>
-
+</header>
     <main class="flex-grow-1 mt-5 pt-4">
         <div class="container py-5">
             {% block content %}{% endblock %}
         </div>
     </main>
 
-    <footer class="bg-dark text-white mt-auto py-4">
+    <footer class="text-white mt-auto py-4" style="background-color: #1F1C37FC">
         <div class="container">
             <div class="row">
                 <div class="col-md-4 mb-4">
-                    <h5 class="mb-3">Контакты</h5>
+                    <h5 class="mb-3 text-white">Контакты</h5>
                     <ul class="list-unstyled">
                         <li><i class="bi bi-geo-alt me-2"></i>Москва, ул. Прекрасная, 15</li>
                         <li class="my-2"><i class="bi bi-telephone me-2"></i>+7 (495) 123-45-67</li>
@@ -59,14 +86,14 @@
                     </ul>
                 </div>
                 <div class="col-md-4 mb-4">
-                    <h5 class="mb-3">Часы работы</h5>
+                    <h5 class="mb-3 text-white">Часы работы</h5>
                     <ul class="list-unstyled">
                         <li>Пн-Пт: 10:00 - 21:00</li>
                         <li>Сб-Вс: 11:00 - 20:00</li>
                     </ul>
                 </div>
                 <div class="col-md-4 mb-4">
-                    <h5 class="mb-3">Соцсети</h5>
+                    <h5 class="mb-3 text-white">Соцсети</h5>
                     <div class="social-links">
                         <a href="#" class="text-white me-3"><i class="bi bi-instagram fs-4"></i></a>
                         <a href="#" class="text-white me-3"><i class="bi bi-facebook fs-4"></i></a>
@@ -78,6 +105,5 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{% static 'js/scripts.js' %}"></script>
 </body>
 </html>

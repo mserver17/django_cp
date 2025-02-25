@@ -1,0 +1,56 @@
+{% extends "base_generic.html" %}
+{% load static %}
+
+{% block title %}Оставить отзыв{% endblock %}
+
+{% block content %}
+<div class="container d-flex flex-column align-items-center justify-content-center mt-5">
+    <div class="review-form-box p-4 shadow-lg rounded">
+        <h2 class="mb-3" style="color: #7752ff">Оставить отзыв</h2>
+        <p class="text-muted">
+            Запись: {{ appointment.date|date:"d.m.Y" }} {{ appointment.time|time:"H:i" }}
+            <br>
+            Мастер: {{ appointment.employee.name }}
+        </p>
+
+        <form method="post" class="w-100 mt-3">
+            {% csrf_token %}
+
+            <div class="mb-3 text-start">
+                <label class="form-label fw-bold">{{ form.rating.label }}:</label>
+                {{ form.rating }}
+                {% if form.rating.errors %}
+                <div class="text-danger">
+                    {{ form.rating.errors }}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="mb-3 text-start">
+                <label class="form-label fw-bold">{{ form.comment.label }}:</label>
+                {{ form.comment }}
+                {% if form.comment.errors %}
+                <div class="text-danger">
+                    {{ form.comment.errors }}
+                </div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn w-100 mt-2" style="background-color: #7752ff; color: white">
+                Отправить отзыв
+            </button>
+        </form>
+    </div>
+</div>
+
+<style>
+.review-form-box {
+    max-width: 500px;
+    background: #fff;
+    transition: transform 0.3s ease-in-out;
+}
+.review-form-box:hover {
+    transform: scale(1.01);
+}
+</style>
+{% endblock %}

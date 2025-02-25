@@ -1,0 +1,4 @@
+<option value="">---------</option>
+{% for employee in employees %}
+<option value="{{ employee.id }}">{{ employee.name }} ({{ employee.position }})</option>
+{% endfor %}

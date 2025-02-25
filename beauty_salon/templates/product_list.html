@@ -1,12 +1,81 @@
-{% extends 'base_generic.html' %}
+{% extends "base_generic.html" %}
+{% load static %}
 
 {% block title %}Продукты{% endblock %}
 
 {% block content %}
-<h1>Продукты</h1>
-<ul>
-    {% for product in products %}
-    <li>{{ product.name }} - {{ product.price }} руб.</li>
-    {% endfor %}
-</ul>
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Наши продукты</h1>
+
+    <div class="row">
+        {% for product in products %}
+        <div class="col-md-4 mb-4">
+            <div class="card product-card h-100 shadow-sm">
+                <!-- Если eсть поле image,
+                     <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                     иначе заглушка: -->
+                <img src="/static/images/products_default.jpg"
+                     class="card-img-top"
+                     alt="{{ product.name }}">
+
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title mb-2">{{ product.name }}</h5>
+
+                    {% if product.category %}
+                    <p class="card-subtitle text-muted mb-2">
+                        {{ product.category.name }}
+                    </p>
+                    {% endif %}
+
+                    {% if product.description %}
+                    <p class="card-text text-muted flex-grow-1">
+                        {{ product.description|truncatewords:15 }}
+                    </p>
+                    {% endif %}
+
+                    <h5 class="mb-3" style="color: #7752ff">
+                        {{ product.price }} руб.
+                    </h5>
+
+                    <a href="#" class="btn btn-custom">
+                        Подробнее
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-center">Нет доступных продуктов</p>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .product-card {
+        transition: transform 0.3s ease;
+    }
+    .product-card:hover {
+        transform: scale(1.008);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    }
+    .btn-custom {
+      border-color: #8c7cff;
+      color: #5436cd;
+      transition: background-color 0.3s ease-in-out;
+    }
+
+
+    .btn-custom:hover {
+      background-color: #6e60cc;
+      border-color: #6e60cc;
+      color: #fff;
+}
+    .btn-custom:focus,
+
+    .btn-custom:active {
+      background-color: #5d4fb3;
+      border-color: #5d4fb3;
+      color: #fff;
+    }
+
+</style>
 {% endblock %}

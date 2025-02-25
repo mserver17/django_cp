@@ -1,0 +1,35 @@
+{% extends "base_generic.html" %}
+{% load static %}
+
+{% block title %}Изменить отзыв{% endblock %}
+
+{% block content %}
+<div class="container d-flex flex-column align-items-center justify-content-center mt-5">
+    <div class="review-edit-box p-4 shadow-lg rounded" style="max-width: 550px; background: #fff;">
+        <h2 class="mb-3" style="color: #7752ff;">Изменить отзыв</h2>
+
+        <p class="text-muted">
+            Запись: {{ review.appointment.date|date:"d.m.Y" }}
+            {{ review.appointment.time|time:"H:i" }}
+            ({{ review.appointment.employee.name }})
+        </p>
+
+        <form method="post" class="mt-3">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn w-100 mt-2" style="background-color: #7752ff; color: white">
+                Сохранить
+            </button>
+        </form>
+    </div>
+</div>
+
+<style>
+.review-edit-box {
+    transition: transform 0.3s ease-in-out;
+}
+.review-edit-box:hover {
+    transform: scale(1.01);
+}
+</style>
+{% endblock %}

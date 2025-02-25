@@ -1,0 +1,89 @@
+{% extends 'base_generic.html' %}
+{% load static %}
+
+{% block title %}Запись на приём{% endblock %}
+
+{% block content %}
+<div class="container d-flex flex-column align-items-center justify-content-center mt-5">
+    <div class="create-appointment-box card shadow-lg border-0 w-100" style="max-width: 600px;">
+        <div class="card-header create-appointment-header text-white">
+            <h2 class="mb-0" style="color: white">Запись на приём</h2>
+        </div>
+        <div class="card-body p-4">
+            <form method="post" id="appointmentForm">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    {{ form.service.label_tag }}
+                    {{ form.service }}
+                    {% if form.service.errors %}
+                        <div class="text-danger">{{ form.service.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.employee.label_tag }}
+                    {{ form.employee }}
+                    {% if form.employee.errors %}
+                        <div class="text-danger">{{ form.employee.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        {{ form.date.label_tag }}
+                        {{ form.date }}
+                        {% if form.date.errors %}
+                            <div class="text-danger">{{ form.date.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.time.label_tag }}
+                        {{ form.time }}
+                        {% if form.time.errors %}
+                            <div class="text-danger">{{ form.time.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="d-grid">
+                      <button type="submit" class="btn w-100 mt-2" style="background-color: #7752ff; color: white">
+                        Записаться
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#id_service').change(function() {
+            var serviceId = $(this).val();
+            $.ajax({
+                url: "{% url 'ajax_load_employees' %}",
+                data: {
+                    'service': serviceId
+                },
+                success: function(data) {
+                    $('#id_employee').html(data);
+                }
+            });
+        });
+    });
+</script>
+
+<style>
+.create-appointment-box {
+    transition: transform 0.3s ease-in-out;
+}
+.create-appointment-box:hover {
+    transform: scale(1.01);
+}
+
+.create-appointment-header {
+    background: linear-gradient(135deg, #35298c 0%, #5d4dcd 50%, #874fdc 50%);
+}
+</style>
+{% endblock %}

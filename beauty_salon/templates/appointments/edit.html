@@ -1,0 +1,29 @@
+{% extends "base_generic.html" %}
+{% load static %}
+
+{% block title %}Редактировать запись{% endblock %}
+
+{% block content %}
+<div class="container d-flex flex-column align-items-center justify-content-center mt-5">
+    <div class="appointment-edit-box p-4 shadow-lg rounded" style="max-width: 550px; background: #fff;">
+        <h2 class="mb-3" style="color: #7752ff;">Редактировать запись</h2>
+
+        <form method="post" class="mt-3">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn w-100 mt-2" style="background-color: #7752ff; color: white">
+                Сохранить
+            </button>
+        </form>
+    </div>
+</div>
+
+<style>
+.appointment-edit-box {
+    transition: transform 0.3s ease-in-out;
+}
+.appointment-edit-box:hover {
+    transform: scale(1.02);
+}
+</style>
+{% endblock %}

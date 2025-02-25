@@ -1,4 +1,3 @@
-// static/js/admin_appointment.js
 document.addEventListener('DOMContentLoaded', function() {
     const serviceSelect = document.getElementById('id_services');
     const employeeSelect = document.getElementById('id_employee');
@@ -26,7 +25,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (serviceSelect) {
         serviceSelect.addEventListener('change', updateEmployees);
-        // Иниц. при загрузке
         updateEmployees();
     }
 });

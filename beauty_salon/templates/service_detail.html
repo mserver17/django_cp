@@ -1,0 +1,81 @@
+{% extends 'base_generic.html' %}
+{% load static %}
+
+{% block title %}
+  {{ service.name }} | Наш салон
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'service_list' %}">Услуги</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ service.name }}</li>
+    </ol>
+  </nav>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h1 class="card-title display-6 mb-3">{{ service.name }}</h1>
+
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <span class="badge bg-primary fs-5">{{ service.price }} ₽</span>
+            {% if service.category %}
+            <span class="badge bg-secondary fs-6">{{ service.category.name }}</span>
+            {% endif %}
+          </div>
+
+          <div class="mb-4">
+            <h3 class="h4 mb-3">Описание услуги</h3>
+            <p class="lead">{{ service.description }}</p>
+          </div>
+          <a href="{% url 'appointment_create'%}" class="btn btn-primary btn-lg w-100">
+            <i class="bi bi-calendar-check me-2"></i>Записаться онлайн
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white">
+          <h2 class="h5 mb-0">Специалисты</h2>
+        </div>
+        <div class="card-body">
+          <div class="list-group">
+            {% for employee in service.employees.all %}
+            <div class="list-group-item border-0">
+              <a href="{% url 'employee_detail' employee.id %}" class="text-decoration-none" >
+              <div class="d-flex align-items-center gap-3">
+                <div class="flex-shrink-0">
+                    {% if employee.photo %}
+                      <img src="{{ employee.photo.url }}"
+                           class="rounded-circle"
+                           width="50"
+                           height="50"
+                           alt="{{ employee.name }}">
+                       {% else %}
+                       <img src="{% static 'images/defaultImage.jpg' %}"
+                           class="rounded-circle"
+                           width="50"
+                           height="50"
+                           alt="{{ employee.name }}">
+                    {% endif %}
+                </div>
+                <div class="flex-grow-1">
+                  <h3 class="h6 mb-1">{{ employee.name }}</h3>
+                  <p class="small text-muted mb-0">{{ employee.position }}</p>
+                </div>
+              </div>
+              </a>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

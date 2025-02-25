@@ -12,32 +12,32 @@ class AppointmentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-
         if self.instance and self.instance.pk:
-            service_ids = self.instance.services.values_list('id', flat=True)
-            self.fields['employee'].queryset = Employee.objects.filter(
-                services__id__in=service_ids
-            ).distinct()
+            if self.instance.service_id:  # одно поле
+                self.fields['employee'].queryset = Employee.objects.filter(
+                    services__id=self.instance.service_id
+                ).distinct()
+            else:
+                self.fields['employee'].queryset = Employee.objects.none()
         else:
             self.fields['employee'].queryset = Employee.objects.none()
 
-        if 'services' in self.data:
+        if 'service' in self.data:
             try:
-                service_ids = [int(x) for x in self.data.getlist('services')]
+                service_id = int(self.data.get('service'))
                 self.fields['employee'].queryset = Employee.objects.filter(
-                    services__id__in=service_ids
+                    services__id=service_id
                 ).distinct()
             except (ValueError, TypeError):
                 pass
-
 @admin.register(Appointment)
 class AppointmentAdmin(admin.ModelAdmin):
     form = AppointmentForm
-    list_display = ('client', 'employee', 'date', 'time')
-    list_filter = ('date', 'employee')
+    list_display = ('client', 'employee', 'date', 'time', 'status')
+    list_editable = ('status',)
+    list_filter = ('status', 'date', 'employee')
     date_hierarchy = 'date'
     raw_id_fields = ('client', 'employee')
-    filter_horizontal = ('services',)
     list_display_links = ('client', 'employee')
 
     class Media:
