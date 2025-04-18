@@ -37,10 +37,14 @@
                     {% if review.appointment %}
                     <div class="mt-auto">
                         <small class="text-muted">
-                            Запись:
+                            Приём был:
                             {{ review.appointment.date|date:"d.m.Y" }}
                             {{ review.appointment.time|time:"H:i" }}
-                            ({{ review.appointment.employee.name }})
+                        </small>
+                        <br>
+                        <small class="text-muted">
+                            Исполнитель:
+                            {{ review.appointment.employee.name }}
                         </small>
                     </div>
                     {% endif %}

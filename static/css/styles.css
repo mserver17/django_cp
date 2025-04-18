@@ -1,81 +1,85 @@
 :root {
-    --primary-color: #dac5fd;
-    --secondary-color: #f0f0f0;
-    --accent-color: #8c7cff;
+  --primary-color: #dac5fd;
+  --secondary-color: #f0f0f0;
+  --accent-color: #8c7cff;
 }
 
 body {
-    font-family: 'Roboto', sans-serif;
-    background-color: #fff9fb;
+  font-family: "Roboto", sans-serif;
+  background-color: #fff9fb;
 }
 
-h1, h2, h3, h4, h5 {
-    font-family: 'Playfair Display', serif;
-    color: #333;
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: "Playfair Display", serif;
+  color: #333;
 }
 
 .navbar {
-    background: linear-gradient(45deg, #5436cd, #8a62ef);
+  background: linear-gradient(45deg, #5436cd, #8a62ef);
 }
 
 .card {
-    transition: transform 0.3s ease;
-    border: none;
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease;
+  border: none;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .card:hover {
-    transform: translateY(-5px);
+  transform: translateY(-5px);
 }
 
 .btn-primary {
-    background-color: var(--accent-color);
-    border: none;
-    padding: 12px 25px;
-    border-radius: 25px;
+  background-color: var(--accent-color);
+  border: none;
+  padding: 12px 25px;
+  border-radius: 25px;
 }
 
 .btn-primary:hover {
-    background-color: #7752ff;
+  background-color: #7752ff;
 }
 
 .service-card {
-    background: white;
-    position: relative;
+  background: white;
+  position: relative;
 }
 
 .service-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 5px;
-    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
 }
 
 .card-img-top {
-    width: 100%;
-    height: 300px;
-    object-fit: cover;
-    object-position: 50% 30%;
-    border-radius: 15px 15px 0 0;
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  object-position: 50% 30%;
+  border-radius: 15px 15px 0 0;
 }
 
 .price-badge {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: var(--accent-color);
-    color: white;
-    padding: 8px 15px;
-    border-radius: 20px;
-    font-size: 0.9rem;
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: var(--accent-color);
+  color: white;
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-size: 0.9rem;
 }
 
 .rating-stars {
-    color: #ffd700;
-    font-size: 1.2rem;
+  color: #ffd700;
+  font-size: 1.2rem;
 }

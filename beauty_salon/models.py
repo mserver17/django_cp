@@ -1,7 +1,8 @@
+# models.py
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import User
-
+from simple_history.models import HistoricalRecords
 class Category(models.Model):
     name = models.CharField(max_length=255, unique=True, verbose_name='Название')
     description = models.TextField(blank=True, null=True, verbose_name='Описание')
@@ -77,6 +78,10 @@ class Appointment(models.Model):
         verbose_name='Статус'
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Создан')
+    history = HistoricalRecords(
+        verbose_name="История изменений",
+        bases=[models.Model],
+    )
     class Meta:
         verbose_name = "Запись"
         verbose_name_plural = "Записи"

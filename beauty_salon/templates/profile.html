@@ -47,8 +47,13 @@
                                     data-bs-target="#collapse{{ forloop.counter }}"
                                     aria-expanded="false"
                                     aria-controls="collapse{{ forloop.counter }}">
-                                    <span class="badge bg-{% if appointment.status == 'confirmed' %}success{% elif appointment.status == 'canceled' %}danger{% else %}warning{% endif %} me-2">
-                                        {{ appointment.get_status_display }}
+                                    <span class="badge 
+                                        {% if appointment.status == 'pending' %}bg-secondary
+                                        {% elif appointment.status == 'confirmed' %}bg-warning
+                                        {% elif appointment.status == 'completed' %}bg-success
+                                        {% elif appointment.status == 'canceled' %}bg-danger
+                                        {% endif %} me-2">
+                                            {{ appointment.get_status_display }}
                                     </span>
                                     {{ appointment.date|date:"d.m.Y" }} {{ appointment.time|time:"H:i" }}
                                 </button>

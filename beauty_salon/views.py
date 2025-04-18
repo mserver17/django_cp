@@ -1,3 +1,4 @@
+# views.py
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Category, Service, Employee, Client, Appointment, Product, Review
 from django.contrib.auth import login
@@ -6,6 +7,15 @@ from django.contrib.auth.views import LogoutView
 from .forms import ClientRegistrationForm, AppointmentForm, ReviewForm
 from django.http import JsonResponse
 from django.template.loader import render_to_string
+
+# Импорты для DRF
+from rest_framework import viewsets, filters, status
+from rest_framework.decorators import action
+
+from rest_framework.response import Response
+from django.db.models import Q
+from .serializers import *
+
 
 def home(request):
     return render(request, 'home.html')
@@ -69,7 +79,6 @@ def profile(request):
         'client': client,
         'appointments': appointments
     })
-
 
 @login_required
 def appointment_create(request):
@@ -143,7 +152,6 @@ def appointment_cancel(request, appointment_id):
     appointment.save()
     return redirect('profile')
 
-
 @login_required
 def add_review(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id, client=request.user.client)
@@ -185,3 +193,94 @@ def edit_review(request, review_id):
         'review': review
     })
 
+# ================== Классы для DRF API ==================
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name']
+
+class ServiceViewSet(viewsets.ModelViewSet):
+    queryset = Service.objects.all()
+    serializer_class = ServiceSerializer
+    filterset_fields = ['category', 'price']
+    search_fields = ['name', 'description']
+
+class EmployeeViewSet(viewsets.ModelViewSet):
+    queryset = Employee.objects.all()
+    serializer_class = EmployeeSerializer
+    search_fields = ['name', 'position']
+    filterset_fields = ['position']
+
+class ClientViewSet(viewsets.ModelViewSet):
+    queryset = Client.objects.all()
+    serializer_class = ClientSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name', 'email']
+
+class AppointmentViewSet(viewsets.ModelViewSet):
+    queryset = Appointment.objects.all()
+    serializer_class = AppointmentSerializer
+    filterset_fields = ['status', 'service', 'employee']
+    search_fields = ['client__name', 'service__name']
+
+    def get_queryset(self):
+        queryset = super().get_queryset() 
+
+        # Пример сложного Q-запроса: задачи на сегодня ИЛИ высокий приоритет
+        date = self.request.query_params.get('date')
+        service = self.request.query_params.get('service')
+        
+        if date and service:
+            queryset = queryset.filter(
+                Q(date=date) & 
+                Q(service__id=service) &
+                ~Q(status='canceled')
+            )
+        return queryset
+
+    @action(detail=False, methods=['get'])
+    def urgent(self, request):
+        from django.utils import timezone
+        queryset = self.get_queryset().filter(
+            Q(date=timezone.now().date()) &
+            Q(status='pending')
+        )
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'])
+    def confirm(self, request, pk=None):
+        appointment = self.get_object()
+        appointment.status = 'confirmed'
+        appointment.save()
+        return Response({'status': 'confirmed'})
+
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    filterset_fields = ['category', 'price']
+    search_fields = ['name']
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+
+    @action(detail=False, methods=['get'])
+    def high_rating(self, request):
+        queryset = self.get_queryset().filter(rating__gte=4)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+# ================== Регистрация роутера для DRF API ==================
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+router.register(r'categories', CategoryViewSet)
+router.register(r'services', ServiceViewSet)
+router.register(r'employees', EmployeeViewSet)
+router.register(r'clients', ClientViewSet)
+router.register(r'appointments', AppointmentViewSet)
+router.register(r'products', ProductViewSet)
+router.register(r'reviews', ReviewViewSet)

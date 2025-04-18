@@ -1,8 +1,16 @@
+# admin.py
 from django.contrib import admin
 from django import forms
 from django.urls import path
 from django.http import JsonResponse
 from .models import Service, Category, Employee, Client, Appointment, Product, Review
+
+from simple_history.admin import SimpleHistoryAdmin
+from import_export.formats import base_formats
+
+from import_export.admin import ImportExportModelAdmin
+from import_export import resources, fields
+from import_export.widgets import ForeignKeyWidget
 
 class AppointmentForm(forms.ModelForm):
     class Meta:
@@ -30,16 +38,45 @@ class AppointmentForm(forms.ModelForm):
                 ).distinct()
             except (ValueError, TypeError):
                 pass
+
+# Ресурс для экспорта записей
+class AppointmentResource(resources.ModelResource):
+    client_name = fields.Field(
+        attribute='client__name',
+        column_name='Клиент'
+    )
+    service_name = fields.Field(
+        attribute='service__name', 
+        column_name='Услуга'
+    )
+    status_display = fields.Field(
+        column_name='Статус',
+        widget=ForeignKeyWidget(Appointment, 'get_status_display')
+    )
+    
+    class Meta:
+        model = Appointment
+        fields = ('id', 'client_name', 'service_name', 'date', 'time', 'status_display')
+        export_order = ('id', 'client_name', 'service_name', 'date', 'time', 'status_display')
+        verbose_name_plural = 'Записи'
+    
+    def get_export_queryset(self):
+        """Фильтрация: исключаем отмененные записи"""
+        return super().get_export_queryset().exclude(status='canceled')
+
 @admin.register(Appointment)
-class AppointmentAdmin(admin.ModelAdmin):
+class AppointmentAdmin(SimpleHistoryAdmin, ImportExportModelAdmin):
+    resource_class = AppointmentResource
     form = AppointmentForm
     list_display = ('client', 'employee', 'date', 'time', 'status')
+    history_list_display = ['status']
     list_editable = ('status',)
     list_filter = ('status', 'date', 'employee')
     date_hierarchy = 'date'
     raw_id_fields = ('client', 'employee')
     list_display_links = ('client', 'employee')
-
+    formats = [base_formats.XLS, base_formats.XLSX, base_formats.CSV]
+    
     class Media:
         js = ('js/admin_appointment.js',)
 
@@ -63,7 +100,7 @@ class AppointmentInline(admin.TabularInline):
     readonly_fields = ('created_at',)
 
 @admin.register(Client)
-class ClientAdmin(admin.ModelAdmin):
+class ClientAdmin(ImportExportModelAdmin):
     list_display = ('name', 'email', 'phone', 'appointment_count')
     search_fields = ('name', 'email')
     inlines = [AppointmentInline]
@@ -74,7 +111,7 @@ class ClientAdmin(admin.ModelAdmin):
     appointment_count.short_description = 'Кол-во записей'
 
 @admin.register(Employee)
-class EmployeeAdmin(admin.ModelAdmin):
+class EmployeeAdmin(ImportExportModelAdmin):
     list_display = ('id', 'name', 'position')
     filter_horizontal = ('services',)
     search_fields = ('name',)
@@ -82,19 +119,19 @@ class EmployeeAdmin(admin.ModelAdmin):
 
 
 @admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
+class CategoryAdmin(ImportExportModelAdmin):
     list_display = ('name',)
 
 
 @admin.register(Service)
-class ServiceAdmin(admin.ModelAdmin):
+class ServiceAdmin(ImportExportModelAdmin):
     list_display = ('name', 'category', 'price')
     list_filter = ('category', 'price')
     search_fields = ('name', 'description')
 
 
 @admin.register(Product)
-class ProductAdmin(admin.ModelAdmin):
+class ProductAdmin(ImportExportModelAdmin):
     list_display = ('name', 'price')
     search_fields = ('name',)
 
@@ -112,7 +149,6 @@ class ReviewAdminForm(forms.ModelForm):
         widgets = {
             'rating': StarRatingWidget(),
         }
-
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
