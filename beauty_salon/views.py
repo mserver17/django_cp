@@ -11,41 +11,36 @@ from django.template.loader import render_to_string
 # Импорты для DRF
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
-
+# from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.response import Response
 from django.db.models import Q
+from rest_framework import permissions
+from .permissions import IsOwnerOrAdmin, IsAdminOrReadOnly
 from .serializers import *
-
 
 def home(request):
     return render(request, 'home.html')
-
 def service_list(request):
     categories = Category.objects.prefetch_related('services').all()
     return render(request, 'service_list.html', {'categories': categories})
 def service_detail(request, service_id):
     service = get_object_or_404(Service, id=service_id)
     return render(request, 'service_detail.html', {'service': service})
-
 def employee_list(request):
     employees = Employee.objects.all()
     return render(request, 'employee_list.html', {'employees': employees})
 def employee_detail(request, employee_id):
     employee = get_object_or_404(Employee, id=employee_id)
     return render(request, 'employee_detail.html', {'employee': employee})
-
 def appointment_list(request):
     appointments = Appointment.objects.all()
     return render(request, 'appointment_list.html', {'appointments': appointments})
-
 def product_list(request):
     products = Product.objects.all()
     return render(request, 'product_list.html', {'products': products})
-
 def review_list(request):
     reviews = Review.objects.all()
     return render(request, 'review_list.html', {'reviews': reviews})
-
 
 def register(request):
     if request.method == 'POST':
@@ -57,7 +52,6 @@ def register(request):
     else:
         form = ClientRegistrationForm()
     return render(request, 'registration/register.html', {'form': form})
-
 class LogoutViewCustom(LogoutView):
     next_page = 'home'
 
@@ -79,7 +73,6 @@ def profile(request):
         'client': client,
         'appointments': appointments
     })
-
 @login_required
 def appointment_create(request):
     if request.method == 'POST':
@@ -94,7 +87,6 @@ def appointment_create(request):
         form = AppointmentForm(user=request.user)
 
     return render(request, 'appointments/create.html', {'form': form})
-
 @login_required
 def appointment_detail(request, appointment_id):
     appointment = get_object_or_404(
@@ -103,7 +95,6 @@ def appointment_detail(request, appointment_id):
         client=request.user.client
     )
     return render(request, 'appointments/detail.html', {'appointment': appointment})
-
 def load_employees(request):
     service_id = request.GET.get('service')
     employees = Employee.objects.filter(
@@ -135,7 +126,6 @@ def appointment_edit(request, appointment_id):
         'form': form,
         'appointment': appointment
     })
-
 @login_required
 def appointment_cancel(request, appointment_id):
     appointment = get_object_or_404(
@@ -175,7 +165,6 @@ def add_review(request, appointment_id):
         form = ReviewForm()
 
     return render(request, 'add_review.html', {'form': form, 'appointment': appointment})
-
 @login_required
 def edit_review(request, review_id):
     review = get_object_or_404(Review, id=review_id, client=request.user.client)
@@ -200,45 +189,79 @@ class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['name']
+    permission_classes = [IsAdminOrReadOnly]
 
 class ServiceViewSet(viewsets.ModelViewSet):
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
     filterset_fields = ['category', 'price']
     search_fields = ['name', 'description']
+    permission_classes = [IsAdminOrReadOnly]
 
 class EmployeeViewSet(viewsets.ModelViewSet):
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
     search_fields = ['name', 'position']
     filterset_fields = ['position']
+    permission_classes = [IsAdminOrReadOnly]
 
 class ClientViewSet(viewsets.ModelViewSet):
     queryset = Client.objects.all()
     serializer_class = ClientSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['name', 'email']
+    permission_classes = [IsAdminOrReadOnly]
 
 class AppointmentViewSet(viewsets.ModelViewSet):
     queryset = Appointment.objects.all()
     serializer_class = AppointmentSerializer
     filterset_fields = ['status', 'service', 'employee']
     search_fields = ['client__name', 'service__name']
+    permission_classes = [IsOwnerOrAdmin]
+    # authentication_classes = [JWTAuthentication]
 
     def get_queryset(self):
-        queryset = super().get_queryset() 
+        # Для администраторов возвращаем все записи
+        if self.request.user.is_staff:
+            queryset = Appointment.objects.all()
+        else:
+            # Для обычных пользователей фильтруем по их клиенту
+            queryset = Appointment.objects.filter(client__user=self.request.user)
 
-        # Пример сложного Q-запроса: задачи на сегодня ИЛИ высокий приоритет
+        # Применяем дополнительные фильтры из параметров запроса
         date = self.request.query_params.get('date')
         service = self.request.query_params.get('service')
-        
+
         if date and service:
             queryset = queryset.filter(
-                Q(date=date) & 
+                Q(date=date) &
                 Q(service__id=service) &
                 ~Q(status='canceled')
             )
         return queryset
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        mutable_data = request.data.copy()
+
+        # Удаляем статус для не-админов
+        if not request.user.is_staff:
+            mutable_data.pop('status', None)
+
+        # Валидируем и сохраняем данные через сериализатор
+        serializer = self.get_serializer(
+            instance,
+            data=mutable_data,
+            partial=kwargs.pop('partial', False)
+        )
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(serializer.data)
+
+    def get_serializer_context(self):
+        # Передаем контекст с запросом в сериализатор
+        return {'request': self.request}
 
     @action(detail=False, methods=['get'])
     def urgent(self, request):
@@ -250,7 +273,7 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAdminUser])
     def confirm(self, request, pk=None):
         appointment = self.get_object()
         appointment.status = 'confirmed'
@@ -262,10 +285,12 @@ class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     filterset_fields = ['category', 'price']
     search_fields = ['name']
+    permission_classes = [IsAdminOrReadOnly]
 
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+    permission_classes = [IsOwnerOrAdmin]
 
     @action(detail=False, methods=['get'])
     def high_rating(self, request):

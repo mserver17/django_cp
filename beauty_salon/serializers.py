@@ -29,10 +29,16 @@ class ClientSerializer(serializers.ModelSerializer):
             'user': {'read_only': True}
         }
 
+
 class AppointmentSerializer(serializers.ModelSerializer):
+    client = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     class Meta:
         model = Appointment
         fields = '__all__'
+        extra_kwargs = {
+            'status': {'read_only': True}  # По умолчанию запрещаем изменение
+        }
         validators = [
             serializers.UniqueTogetherValidator(
                 queryset=Appointment.objects.all(),
@@ -40,6 +46,30 @@ class AppointmentSerializer(serializers.ModelSerializer):
                 message="У клиента уже есть запись на это время"
             )
         ]
+
+    def create(self, validated_data):
+        # Получаем пользователя из validated_data
+        user = validated_data.pop('client')
+        # Находим клиента, связанного с пользователем
+        client = Client.objects.get(user=user)
+        # Создаем запись с правильным клиентом
+        appointment = Appointment.objects.create(client=client, **validated_data)
+        return appointment
+
+    def update(self, instance, validated_data):
+        # Удаляем client из validated_data, если он случайно попал туда
+        validated_data.pop('client', None)
+        return super().update(instance, validated_data)
+
+    def get_fields(self):
+        fields = super().get_fields()
+        # Получаем пользователя из контекста запроса
+        request = self.context.get('request')
+        if request and not request.user.is_staff:
+            fields['status'].read_only = True  # Для клиентов
+        else:
+            fields['status'].read_only = False  # Для админов
+        return fields
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:

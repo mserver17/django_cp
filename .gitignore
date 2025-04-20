@@ -1,0 +1,23 @@
+# Virtual environment
+.venv/
+venv/
+venv
+
+# IDE
+.idea/
+
+# Database
+db.sqlite3
+
+# Python compiled files
+__pycache__/
+*.py[cod]
+
+# Migrations (если не хотите их коммитить)
+# beauty_salon/migrations/
+
+# Media files
+media/
+
+# Environment files
+.env
