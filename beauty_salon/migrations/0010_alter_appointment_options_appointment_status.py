@@ -6,17 +6,31 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('beauty_salon', '0009_client_birth_date_client_user'),
+        ("beauty_salon", "0009_client_birth_date_client_user"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='appointment',
-            options={'ordering': ['-date', '-time'], 'verbose_name': 'Запись', 'verbose_name_plural': 'Записи'},
+            name="appointment",
+            options={
+                "ordering": ["-date", "-time"],
+                "verbose_name": "Запись",
+                "verbose_name_plural": "Записи",
+            },
         ),
         migrations.AddField(
-            model_name='appointment',
-            name='status',
-            field=models.CharField(choices=[('pending', 'Ожидает подтверждения'), ('confirmed', 'Подтверждена'), ('completed', 'Выполнена'), ('canceled', 'Отменена')], default='pending', max_length=20, verbose_name='Статус'),
+            model_name="appointment",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("pending", "Ожидает подтверждения"),
+                    ("confirmed", "Подтверждена"),
+                    ("completed", "Выполнена"),
+                    ("canceled", "Отменена"),
+                ],
+                default="pending",
+                max_length=20,
+                verbose_name="Статус",
+            ),
         ),
     ]

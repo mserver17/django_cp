@@ -8,103 +8,136 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('beauty_salon', '0004_alter_service_category_alter_category_options_and_more'),
+        ("beauty_salon", "0004_alter_service_category_alter_category_options_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='appointment',
-            name='client',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='beauty_salon.client', verbose_name='Клиент'),
+            model_name="appointment",
+            name="client",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                to="beauty_salon.client",
+                verbose_name="Клиент",
+            ),
         ),
         migrations.AlterField(
-            model_name='appointment',
-            name='created_at',
-            field=models.DateTimeField(auto_now_add=True, verbose_name='Создан'),
+            model_name="appointment",
+            name="created_at",
+            field=models.DateTimeField(auto_now_add=True, verbose_name="Создан"),
         ),
         migrations.AlterField(
-            model_name='appointment',
-            name='date',
-            field=models.DateField(verbose_name='Дата'),
+            model_name="appointment",
+            name="date",
+            field=models.DateField(verbose_name="Дата"),
         ),
         migrations.AlterField(
-            model_name='appointment',
-            name='employee',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='beauty_salon.employee', verbose_name='Исполнитель'),
+            model_name="appointment",
+            name="employee",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                to="beauty_salon.employee",
+                verbose_name="Исполнитель",
+            ),
         ),
         migrations.AlterField(
-            model_name='appointment',
-            name='services',
-            field=models.ManyToManyField(to='beauty_salon.service', verbose_name='Услуги'),
+            model_name="appointment",
+            name="services",
+            field=models.ManyToManyField(
+                to="beauty_salon.service", verbose_name="Услуги"
+            ),
         ),
         migrations.AlterField(
-            model_name='appointment',
-            name='time',
-            field=models.TimeField(verbose_name='Время'),
+            model_name="appointment",
+            name="time",
+            field=models.TimeField(verbose_name="Время"),
         ),
         migrations.AlterField(
-            model_name='category',
-            name='description',
-            field=models.TextField(blank=True, null=True, verbose_name='Описание'),
+            model_name="category",
+            name="description",
+            field=models.TextField(blank=True, null=True, verbose_name="Описание"),
         ),
         migrations.AlterField(
-            model_name='category',
-            name='name',
-            field=models.CharField(max_length=255, unique=True, verbose_name='Название'),
+            model_name="category",
+            name="name",
+            field=models.CharField(
+                max_length=255, unique=True, verbose_name="Название"
+            ),
         ),
         migrations.AlterField(
-            model_name='client',
-            name='email',
-            field=models.EmailField(max_length=254, unique=True, verbose_name='email'),
+            model_name="client",
+            name="email",
+            field=models.EmailField(max_length=254, unique=True, verbose_name="email"),
         ),
         migrations.AlterField(
-            model_name='client',
-            name='name',
-            field=models.CharField(max_length=100, verbose_name='ФИО'),
+            model_name="client",
+            name="name",
+            field=models.CharField(max_length=100, verbose_name="ФИО"),
         ),
         migrations.AlterField(
-            model_name='client',
-            name='phone',
-            field=models.CharField(max_length=15, unique=True, verbose_name='Номер телефона'),
+            model_name="client",
+            name="phone",
+            field=models.CharField(
+                max_length=15, unique=True, verbose_name="Номер телефона"
+            ),
         ),
         migrations.AlterField(
-            model_name='employee',
-            name='name',
-            field=models.CharField(max_length=100, verbose_name='ФИО'),
+            model_name="employee",
+            name="name",
+            field=models.CharField(max_length=100, verbose_name="ФИО"),
         ),
         migrations.AlterField(
-            model_name='employee',
-            name='position',
-            field=models.CharField(max_length=100, verbose_name='Специализация'),
+            model_name="employee",
+            name="position",
+            field=models.CharField(max_length=100, verbose_name="Специализация"),
         ),
         migrations.AlterField(
-            model_name='employee',
-            name='services',
-            field=models.ManyToManyField(related_name='employees', to='beauty_salon.service', verbose_name='Услуги'),
+            model_name="employee",
+            name="services",
+            field=models.ManyToManyField(
+                related_name="employees",
+                to="beauty_salon.service",
+                verbose_name="Услуги",
+            ),
         ),
         migrations.AlterField(
-            model_name='review',
-            name='rating',
-            field=models.IntegerField(validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(5)], verbose_name='Оценка'),
+            model_name="review",
+            name="rating",
+            field=models.IntegerField(
+                validators=[
+                    django.core.validators.MinValueValidator(1),
+                    django.core.validators.MaxValueValidator(5),
+                ],
+                verbose_name="Оценка",
+            ),
         ),
         migrations.AlterField(
-            model_name='service',
-            name='category',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='services', to='beauty_salon.category', verbose_name='Категория'),
+            model_name="service",
+            name="category",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="services",
+                to="beauty_salon.category",
+                verbose_name="Категория",
+            ),
         ),
         migrations.AlterField(
-            model_name='service',
-            name='description',
-            field=models.TextField(blank=True, null=True, verbose_name='Описание'),
+            model_name="service",
+            name="description",
+            field=models.TextField(blank=True, null=True, verbose_name="Описание"),
         ),
         migrations.AlterField(
-            model_name='service',
-            name='name',
-            field=models.CharField(max_length=255, verbose_name='Наименование услуги'),
+            model_name="service",
+            name="name",
+            field=models.CharField(max_length=255, verbose_name="Наименование услуги"),
         ),
         migrations.AlterField(
-            model_name='service',
-            name='price',
-            field=models.DecimalField(decimal_places=2, max_digits=10, verbose_name='Цена'),
+            model_name="service",
+            name="price",
+            field=models.DecimalField(
+                decimal_places=2, max_digits=10, verbose_name="Цена"
+            ),
         ),
     ]

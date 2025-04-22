@@ -6,17 +6,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('beauty_salon', '0011_remove_appointment_services_appointment_service'),
+        ("beauty_salon", "0011_remove_appointment_services_appointment_service"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='appointment',
-            name='service',
+            model_name="appointment",
+            name="service",
         ),
         migrations.AddField(
-            model_name='appointment',
-            name='services',
-            field=models.ManyToManyField(to='beauty_salon.service', verbose_name='Услуги'),
+            model_name="appointment",
+            name="services",
+            field=models.ManyToManyField(
+                to="beauty_salon.service", verbose_name="Услуги"
+            ),
         ),
     ]

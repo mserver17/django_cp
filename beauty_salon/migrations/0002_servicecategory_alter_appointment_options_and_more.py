@@ -7,49 +7,63 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('beauty_salon', '0001_initial'),
+        ("beauty_salon", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ServiceCategory',
+            name="ServiceCategory",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('description', models.TextField(blank=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                ("description", models.TextField(blank=True)),
             ],
             options={
-                'verbose_name': 'Категория услуг',
-                'verbose_name_plural': 'Категории услуг',
+                "verbose_name": "Категория услуг",
+                "verbose_name_plural": "Категории услуг",
             },
         ),
         migrations.AlterModelOptions(
-            name='appointment',
-            options={'verbose_name': 'Запись', 'verbose_name_plural': 'Записи'},
+            name="appointment",
+            options={"verbose_name": "Запись", "verbose_name_plural": "Записи"},
         ),
         migrations.AlterModelOptions(
-            name='client',
-            options={'verbose_name': 'Клиент', 'verbose_name_plural': 'Клиенты'},
+            name="client",
+            options={"verbose_name": "Клиент", "verbose_name_plural": "Клиенты"},
         ),
         migrations.AlterModelOptions(
-            name='employee',
-            options={'verbose_name': 'Сотрудник', 'verbose_name_plural': 'Сотрудники'},
+            name="employee",
+            options={"verbose_name": "Сотрудник", "verbose_name_plural": "Сотрудники"},
         ),
         migrations.AlterModelOptions(
-            name='product',
-            options={'verbose_name': 'Продукт', 'verbose_name_plural': 'Продукты'},
+            name="product",
+            options={"verbose_name": "Продукт", "verbose_name_plural": "Продукты"},
         ),
         migrations.AlterModelOptions(
-            name='review',
-            options={'verbose_name': 'Отзыв', 'verbose_name_plural': 'Отзывы'},
+            name="review",
+            options={"verbose_name": "Отзыв", "verbose_name_plural": "Отзывы"},
         ),
         migrations.AlterModelOptions(
-            name='service',
-            options={'verbose_name': 'Услуга', 'verbose_name_plural': 'Услуги'},
+            name="service",
+            options={"verbose_name": "Услуга", "verbose_name_plural": "Услуги"},
         ),
         migrations.AddField(
-            model_name='service',
-            name='category',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='services', to='beauty_salon.servicecategory'),
+            model_name="service",
+            name="category",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="services",
+                to="beauty_salon.servicecategory",
+            ),
         ),
     ]

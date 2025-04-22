@@ -7,18 +7,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('beauty_salon', '0010_alter_appointment_options_appointment_status'),
+        ("beauty_salon", "0010_alter_appointment_options_appointment_status"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='appointment',
-            name='services',
+            model_name="appointment",
+            name="services",
         ),
         migrations.AddField(
-            model_name='appointment',
-            name='service',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='beauty_salon.service', verbose_name='Услуга'),
+            model_name="appointment",
+            name="service",
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="beauty_salon.service",
+                verbose_name="Услуга",
+            ),
             preserve_default=False,
         ),
     ]

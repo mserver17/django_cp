@@ -7,65 +7,82 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('beauty_salon', '0003_category'),
+        ("beauty_salon", "0003_category"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='service',
-            name='category',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='services', to='beauty_salon.category'),
+            model_name="service",
+            name="category",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="services",
+                to="beauty_salon.category",
+            ),
         ),
         migrations.AlterModelOptions(
-            name='category',
-            options={'verbose_name': 'Категория', 'verbose_name_plural': 'Категории'},
+            name="category",
+            options={"verbose_name": "Категория", "verbose_name_plural": "Категории"},
         ),
         migrations.AddField(
-            model_name='category',
-            name='description',
+            model_name="category",
+            name="description",
             field=models.TextField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='product',
-            name='category',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='products', to='beauty_salon.category'),
+            model_name="product",
+            name="category",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="products",
+                to="beauty_salon.category",
+            ),
         ),
         migrations.AddField(
-            model_name='review',
-            name='client',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='beauty_salon.client'),
+            model_name="review",
+            name="client",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="beauty_salon.client",
+            ),
         ),
         migrations.AlterField(
-            model_name='client',
-            name='email',
+            model_name="client",
+            name="email",
             field=models.EmailField(max_length=254, unique=True),
         ),
         migrations.AlterField(
-            model_name='client',
-            name='phone',
+            model_name="client",
+            name="phone",
             field=models.CharField(max_length=15, unique=True),
         ),
         migrations.AlterField(
-            model_name='product',
-            name='description',
+            model_name="product",
+            name="description",
             field=models.TextField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='service',
-            name='description',
+            model_name="service",
+            name="description",
             field=models.TextField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='service',
-            name='name',
+            model_name="service",
+            name="name",
             field=models.CharField(max_length=255),
         ),
         migrations.AlterField(
-            model_name='service',
-            name='price',
+            model_name="service",
+            name="price",
             field=models.DecimalField(decimal_places=2, max_digits=10),
         ),
         migrations.DeleteModel(
-            name='ServiceCategory',
+            name="ServiceCategory",
         ),
     ]

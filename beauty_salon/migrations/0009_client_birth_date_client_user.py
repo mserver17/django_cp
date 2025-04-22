@@ -8,19 +8,24 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('beauty_salon', '0008_remove_employee_image_employee_photo'),
+        ("beauty_salon", "0008_remove_employee_image_employee_photo"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='client',
-            name='birth_date',
-            field=models.DateField(blank=True, null=True, verbose_name='Дата рождения'),
+            model_name="client",
+            name="birth_date",
+            field=models.DateField(blank=True, null=True, verbose_name="Дата рождения"),
         ),
         migrations.AddField(
-            model_name='client',
-            name='user',
-            field=models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="client",
+            name="user",
+            field=models.OneToOneField(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]
