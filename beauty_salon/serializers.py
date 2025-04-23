@@ -176,8 +176,6 @@ class ReviewSerializer(serializers.ModelSerializer):
         return appointment
 
     def create(self, validated_data):
-        # «client» здесь — это User, а нам нужен Client
         user = validated_data.pop("client")
         client = Client.objects.get(user=user)
-        # создаём Review уже с правильным client
         return Review.objects.create(client=client, **validated_data)

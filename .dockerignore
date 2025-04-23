@@ -1,0 +1,23 @@
+.venv/
+venv/
+
+.idea/
+.vscode/
+
+__pycache__/
+*.py[cod]
+
+db.sqlite3
+
+media/
+
+# Исключить статику (collectstatic)
+static/
+
+.env
+.env.local
+
+.git/
+.gitignore
+
+*.log

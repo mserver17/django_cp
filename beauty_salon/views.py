@@ -279,14 +279,12 @@ class AppointmentViewSet(viewsets.ModelViewSet):
     # authentication_classes = [JWTAuthentication]
 
     def get_queryset(self):
-        # Для администраторов возвращаем все записи
         if self.request.user.is_staff:
             queryset = Appointment.objects.all()
         else:
-            # Для обычных пользователей фильтруем по их клиенту
             queryset = Appointment.objects.filter(client__user=self.request.user)
 
-        # Применяем дополнительные фильтры из параметров запроса
+        # дополнительные фильтры из параметров запроса
         date = self.request.query_params.get("date")
         service = self.request.query_params.get("service")
 
