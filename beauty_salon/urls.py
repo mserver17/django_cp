@@ -1,8 +1,6 @@
-# beauty_salon/urls.py
 from django.urls import path
-# from django.contrib.auth.views import LogoutView
 from . import views
-from .views import add_review, edit_review
+from .views import CurrentUserView, add_review, edit_review
 
 urlpatterns = [
     path("", views.home, name="home"),
@@ -34,4 +32,5 @@ urlpatterns = [
     path("review/<int:review_id>/edit/", edit_review, name="edit_review"),
     path("appointment/<int:appointment_id>/add_review/", add_review, name="add_review"),
     path("register/", views.register, name="register"),
+    path("me/", CurrentUserView.as_view(), name="current-user"),
 ]

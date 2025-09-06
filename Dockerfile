@@ -1,4 +1,4 @@
-FROM python:3.13-slim
+FROM python:3.10-slim
 
 LABEL maintainer="msuin"
 
@@ -14,9 +14,9 @@ RUN apt-get update && \
 
 WORKDIR /code
 
-COPY requirements.txt /code/
+COPY requirements-prod.txt /code/requirements-prod.txt
 RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
+    pip install -r /code/requirements-prod.txt
 
 COPY . /code/
 

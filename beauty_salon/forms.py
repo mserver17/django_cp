@@ -1,10 +1,10 @@
-# forms.py
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import Client, Appointment, Service, Employee, Review
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group, User
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+
+from .models import Appointment, Client, Employee, Review, Service
 
 
 class AppointmentForm(forms.ModelForm):

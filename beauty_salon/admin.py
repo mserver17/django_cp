@@ -1,16 +1,15 @@
-# admin.py
-from django.contrib import admin
 from django import forms
-from django.urls import path
+from django.contrib import admin
 from django.http import JsonResponse
-from .models import Service, Category, Employee, Client, Appointment, Product, Review
-
-from simple_history.admin import SimpleHistoryAdmin
-from import_export.formats import base_formats
-
+from django.urls import path
+from django.utils.safestring import mark_safe
+from import_export import fields, resources
 from import_export.admin import ImportExportModelAdmin
-from import_export import resources, fields
+from import_export.formats import base_formats
 from import_export.widgets import ForeignKeyWidget
+from simple_history.admin import SimpleHistoryAdmin
+
+from .models import Appointment, Category, Client, Employee, Product, Review, Service
 
 
 class AppointmentForm(forms.ModelForm):
@@ -127,8 +126,23 @@ class EmployeeAdmin(ImportExportModelAdmin):
 
 
 @admin.register(Category)
-class CategoryAdmin(ImportExportModelAdmin):
-    list_display = ("name",)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ["name", "image_preview"]
+    readonly_fields = ["image_preview"]
+
+    def image_preview(self, obj):
+        if obj.image and hasattr(obj.image, "url"):
+            try:
+                img_html = (
+                    f'<img src="{obj.image.url}" '
+                    'width="100" height="100" style="object-fit: cover;" />'
+                )
+                return mark_safe(img_html)
+            except ValueError:
+                return "Файл поврежден"
+        return "Нет изображения"
+
+    image_preview.short_description = "Превью изображения"
 
 
 @admin.register(Service)
@@ -164,7 +178,16 @@ class ReviewAdmin(admin.ModelAdmin):
     form = ReviewAdminForm
     list_display = ("appointment", "rating_display")
     list_filter = ("rating",)
-    readonly_fields = ("appointment",)
+    readonly_fields = [
+        "appointment",
+        "client",
+        "rating",
+        "comment",
+    ]
+
+    def has_add_permission(self, request):
+        # Запретить админам создавать отзывы через админку
+        return False
 
     def rating_display(self, obj):
         return "⭐" * obj.rating

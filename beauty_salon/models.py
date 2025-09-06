@@ -1,13 +1,14 @@
-# models.py
-from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
 from simple_history.models import HistoricalRecords
 
 
 class Category(models.Model):
     name = models.CharField(max_length=255, unique=True, verbose_name="Название")
     description = models.TextField(blank=True, null=True, verbose_name="Описание")
+    image = models.ImageField(upload_to="categories/", null=True, blank=True)
 
     class Meta:
         verbose_name = "Категория"
@@ -143,3 +144,8 @@ class Review(models.Model):
             if self.appointment
             else "Отзыв без привязки"
         )
+
+    def save(self, *args, **kwargs):
+        if self.appointment and self.appointment.status != "completed":
+            raise ValidationError("Отзыв можно оставить только к завершённой записи.")
+        super().save(*args, **kwargs)

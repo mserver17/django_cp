@@ -1,37 +1,43 @@
-# views.py
-from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LogoutView
+from django.core.exceptions import ValidationError
 from django.db.models import Q
-
-from .models import (
-    Category,
-    Service,
-    Employee,
-    Client,
-    Appointment,
-    Product,
-    Review,
-)
-from .forms import ClientRegistrationForm, AppointmentForm, ReviewForm
-from .permissions import IsOwnerOrAdmin, IsAdminOrReadOnly
+from django.shortcuts import get_object_or_404, redirect, render
 
 # DRF imports
-from rest_framework import viewsets, filters
+from rest_framework import filters
+from rest_framework import permissions
+from rest_framework import permissions as drf_permissions
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.routers import DefaultRouter
+from rest_framework.views import APIView
+from rest_framework_simplejwt.views import TokenObtainPairView
 
+# Cache imports
+from django.core.cache import cache
+from .cache_utils import get_cached_data
+from .decorators import cache_per_user
+from django.utils.decorators import method_decorator
+
+from .forms import AppointmentForm, ClientRegistrationForm, ReviewForm
+from .models import Appointment, Category, Client, Employee, Product, Review, Service
+from .permissions import IsAdminOrReadOnly, IsOwnerOrAdmin
 from .serializers import (
-    CategorySerializer,
-    ServiceSerializer,
-    EmployeeSerializer,
-    ClientSerializer,
     AppointmentSerializer,
+    CategorySerializer,
+    ClientSerializer,
+    EmailTokenObtainPairSerializer,
+    EmployeeSerializer,
     ProductSerializer,
+    RegisterSerializer,
     ReviewSerializer,
+    ServiceSerializer,
+    UserSerializer,
 )
 
 
@@ -245,6 +251,18 @@ class CategoryViewSet(viewsets.ModelViewSet):
     search_fields = ["name"]
     permission_classes = [IsAdminOrReadOnly]
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["request"] = self.request
+        return context
+
+    def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Category.objects.none()
+
+        cache_key = "categories_all"
+        return get_cached_data(cache_key, lambda: Category.objects.all(), 60 * 60)
+
 
 class ServiceViewSet(viewsets.ModelViewSet):
     queryset = Service.objects.all()
@@ -252,6 +270,16 @@ class ServiceViewSet(viewsets.ModelViewSet):
     filterset_fields = ["category", "price"]
     search_fields = ["name", "description"]
     permission_classes = [IsAdminOrReadOnly]
+    pagination_class = None
+
+    def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Service.objects.none()
+
+        cache_key = "services_all"
+        return get_cached_data(
+            cache_key, lambda: Service.objects.all(), 60 * 30  # 30 минут для услуг
+        )
 
 
 class EmployeeViewSet(viewsets.ModelViewSet):
@@ -260,6 +288,31 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     search_fields = ["name", "position"]
     filterset_fields = ["position", "services"]
     permission_classes = [IsAdminOrReadOnly]
+    pagination_class = None
+
+    def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Employee.objects.none()
+
+        cache_key = "employees_all"
+        return get_cached_data(cache_key, lambda: Employee.objects.all(), 60 * 30)
+
+
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    filterset_fields = ["category", "price"]
+    search_fields = ["name"]
+    permission_classes = [IsAdminOrReadOnly]
+
+    def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Product.objects.none()
+
+        cache_key = "products_all"
+        return get_cached_data(
+            cache_key, lambda: Product.objects.all(), 60 * 30  # 30 минут для продуктов
+        )
 
 
 class ClientViewSet(viewsets.ModelViewSet):
@@ -276,15 +329,24 @@ class AppointmentViewSet(viewsets.ModelViewSet):
     filterset_fields = ["status", "service", "employee"]
     search_fields = ["client__name", "service__name"]
     permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
-    # authentication_classes = [JWTAuthentication]
 
     def get_queryset(self):
+        # Для генерации схемы Swagger возвращаем пустой queryset
+        if getattr(self, "swagger_fake_view", False):
+            return Appointment.objects.none()
+
+        # Проверяем, аутентифицирован ли пользователь
+        if not self.request.user.is_authenticated:
+            return Appointment.objects.none()
+
         if self.request.user.is_staff:
             queryset = Appointment.objects.all()
         else:
-            queryset = Appointment.objects.filter(client__user=self.request.user)
+            try:
+                queryset = Appointment.objects.filter(client__user=self.request.user)
+            except (AttributeError, ValueError):
+                return Appointment.objects.none()
 
-        # дополнительные фильтры из параметров запроса
         date = self.request.query_params.get("date")
         service = self.request.query_params.get("service")
 
@@ -310,7 +372,6 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def get_serializer_context(self):
-        # Передаем контекст с запросом в сериализатор
         return {"request": self.request}
 
     @action(detail=False, methods=["get"])
@@ -330,25 +391,98 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         appointment.save()
         return Response({"status": "confirmed"})
 
+    @method_decorator(cache_per_user(60 * 5))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
-class ProductViewSet(viewsets.ModelViewSet):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-    filterset_fields = ["category", "price"]
-    search_fields = ["name"]
-    permission_classes = [IsAdminOrReadOnly]
+    @method_decorator(cache_per_user(60 * 5))
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
 
 
+@method_decorator(cache_per_user(60 * 15), name="list")
+@method_decorator(cache_per_user(60 * 15), name="retrieve")
 class ReviewViewSet(viewsets.ModelViewSet):
-    queryset = Review.objects.all()
+    queryset = Review.objects.select_related(
+        "appointment",
+        "appointment__employee",
+        "appointment__service",
+        "client",
+        "client__user",
+    ).all()
     serializer_class = ReviewSerializer
-    permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
+    pagination_class = None
+
+    def get_queryset(self):
+        return super().get_queryset()
 
     @action(detail=False, methods=["get"])
     def high_rating(self, request):
         queryset = self.get_queryset().filter(rating__gte=4)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+    def perform_create(self, serializer):
+        client = self.request.user.client
+        appointment = serializer.validated_data.get("appointment")
+
+        if appointment.status != "completed":
+            raise ValidationError("Приём не завершён.")
+
+        if appointment.client != client:
+            raise PermissionDenied("Вы не можете оставить отзыв к чужой записи.")
+
+        serializer.save(client=client)
+
+    def perform_update(self, serializer):
+        if "client" in serializer.validated_data:
+            raise PermissionDenied("Нельзя изменять клиента отзыва.")
+        serializer.save()
+
+    def get_permissions(self):
+        if self.request.method in permissions.SAFE_METHODS:
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated(), IsOwnerOrAdmin()]
+
+
+class UserReviewViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Review.objects.select_related(
+            "appointment",
+            "appointment__employee",
+            "appointment__service",
+            "client",
+            "client__user",
+        ).filter(client__user=self.request.user)
+
+
+# ================== Доп. API View ==================
+class CurrentUserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = UserSerializer(request.user, context={"request": request})
+        return Response(serializer.data)
+
+
+class RegisterAPIView(APIView):
+    permission_classes = [drf_permissions.AllowAny]
+
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response(
+                {"detail": "Пользователь создан"}, status=status.HTTP_201_CREATED
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class EmailTokenObtainPairView(TokenObtainPairView):
+    serializer_class = EmailTokenObtainPairSerializer
 
 
 # ================== Регистрация роутера для DRF API ==================
@@ -360,3 +494,4 @@ router.register(r"clients", ClientViewSet)
 router.register(r"appointments", AppointmentViewSet)
 router.register(r"products", ProductViewSet)
 router.register(r"reviews", ReviewViewSet)
+router.register(r"my-reviews", UserReviewViewSet, basename="my-review")
